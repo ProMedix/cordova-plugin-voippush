@@ -68,21 +68,12 @@
 		<string>voip</string>
             </array>
         </config-file>
-
-        <config-file target="Entitlements-Debug.plist" parent="plist">
-            <dict>
-                <key>aps-environment</key>
-                <string>development</string>
-            </dict>
+        <config-file target="*/Entitlements-Debug.plist" parent="aps-environment">
+            <string>development</string>
         </config-file>
-
-        <config-file target="Entitlements-Release.plist" parent="plist">
-            <dict>
-                <key>aps-environment</key>
-                <string>production</string>
-            </dict>
+        <config-file target="*/Entitlements-Release.plist" parent="aps-environment">
+            <string>production</string>
         </config-file>
-
         <header-file src="src/ios/CDVVoipPush.h" />
         <source-file src="src/ios/CDVVoipPush.m" />
 
