@@ -1,7 +1,7 @@
 var exec = cordova.require('cordova/exec');
 
 var VoipPush = function() {
-	console.log('VoipPush instanced');
+	console.log('VoipPush instantiated');
 };
 
 VoipPush.prototype.register = function(tokenCallback,notificationCallback) {
