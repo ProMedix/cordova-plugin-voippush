@@ -37,8 +37,20 @@
         self.callbackId = command.callbackId;
 
         // if push token available call the token callback
-        NSData *token = [voipRegistry pushTokenForType:PKPushTypeVoIP];
-        if (token != nil) {
+        NSData *tokenData = [voipRegistry pushTokenForType:PKPushTypeVoIP];
+        if (tokenData != nil) {
+            if ([tokenData length] != 32) {
+                NSLog(@"Incorrect push token length: %lu", (unsigned long)tokenData.length);
+                return;
+            }
+            
+            // https://stackoverflow.com/questions/9372815/how-can-i-convert-my-device-token-nsdata-into-an-nsstring/9372848#9372848
+            const unsigned *tokenBytes = [tokenData bytes];
+            NSString *token = [NSString stringWithFormat:@"%08x%08x%08x%08x%08x%08x%08x%08x",
+                                ntohl(tokenBytes[0]), ntohl(tokenBytes[1]), ntohl(tokenBytes[2]),
+                                ntohl(tokenBytes[3]), ntohl(tokenBytes[4]), ntohl(tokenBytes[5]),
+                                ntohl(tokenBytes[6]), ntohl(tokenBytes[7])];
+            
             NSMutableDictionary* pushMessage = [NSMutableDictionary dictionaryWithCapacity:2];
             [pushMessage setObject:token forKey:@"token"];
             [pushMessage setObject:PKPushTypeVoIP forKey:@"type"];
@@ -53,11 +65,18 @@
 // Handle updated push credentials
 - (void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials: (PKPushCredentials *)credentials forType:(NSString *)type {
     NSLog(@"VoipPush Plugin token received: %@", credentials.token);
-
-    NSString *token = [[[[credentials.token description] stringByReplacingOccurrencesOfString:@"<"withString:@""]
-                        stringByReplacingOccurrencesOfString:@">" withString:@""]
-                       stringByReplacingOccurrencesOfString: @" " withString: @""];
-
+    if ([credentials.token length] != 32) {
+        NSLog(@"Incorrect push token length: %lu", (unsigned long)(credentials.token.length));
+        return;
+    }
+    
+    // https://stackoverflow.com/questions/9372815/how-can-i-convert-my-device-token-nsdata-into-an-nsstring/9372848#9372848
+    const unsigned *tokenBytes = [credentials.token bytes];
+    NSString *token = [NSString stringWithFormat:@"%08x%08x%08x%08x%08x%08x%08x%08x",
+                        ntohl(tokenBytes[0]), ntohl(tokenBytes[1]), ntohl(tokenBytes[2]),
+                        ntohl(tokenBytes[3]), ntohl(tokenBytes[4]), ntohl(tokenBytes[5]),
+                        ntohl(tokenBytes[6]), ntohl(tokenBytes[7])];
+    
     NSMutableDictionary* pushMessage = [NSMutableDictionary dictionaryWithCapacity:2];
     [pushMessage setObject:token forKey:@"token"];
     [pushMessage setObject:credentials.type forKey:@"type"];
