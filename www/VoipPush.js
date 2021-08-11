@@ -8,7 +8,7 @@ VoipPush.prototype.register = function(tokenCallback,notificationCallback) {
 	if (!tokenCallback) { tokenCallback = function() {}; }
 	if (!notificationCallback) { notificationCallback = function() {}; }
 
-	var errorCallback = function() {};
+	var errorCallback = function(error) {console.error(error)};
 	var successCallback = function(obj) {
 		if (obj.hasOwnProperty('token')) {
 			tokenCallback(obj);
